@@ -1,0 +1,65 @@
+@baseUrl = http://localhost:3000
+
+### Health Check (tanpa token)
+GET {{baseUrl}}/api/health
+
+### Register - Admin
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "leaderadmin@gmail.com",
+  "password": "123123",
+  "role": "admin"
+}
+
+### Register - Applicant
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "praintern@gmail.com",
+  "password": "123123",
+  "role": "applicant"
+}
+
+### Register - Recruiter
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "hrd@gmail.com",
+  "password": "123123",
+  "role": "recruiter"
+}
+
+### Login - Admin (copy token ke @adminToken)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "leaderadmin@gmail.com",
+  "password": "123123"
+}
+
+### Login - Applicant (copy token ke @applicantToken)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "praintern@gmail.com",
+  "password": "123123"
+}
+
+### Login - Recruiter (copy token ke @recruiterToken)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "hrd@gmail.com",
+  "password": "123123"
+}
+
+### Profile User (semua role)
+GET {{baseUrl}}/api/users/me
+Authorization: Bearer {{adminToken}}

@@ -1,0 +1,315 @@
+{
+  "info": {
+    "name": "Job Portal API",
+    "description": "APLIKASI JOB MATCH - Collection per role",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "adminToken", "value": "" },
+    { "key": "applicantToken", "value": "" },
+    { "key": "recruiterToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/health"
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"123123\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register"
+          }
+        },
+        {
+          "name": "Login Admin",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"leaderadmin@gmail.com\",\n  \"password\": \"123123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login Applicant",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"praintern@gmail.com\",\n  \"password\": \"123123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login Recruiter",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hrd@gmail.com\",\n  \"password\": \"123123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Profile User",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/users/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/dashboard"
+          }
+        },
+        {
+          "name": "Buat Company",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"PT Tetile\",\n  \"email\": \"hr@textile.com\",\n  \"description\": \"Perusahaan Tekstil\",\n  \"location\": \"Jakarta\"\n}"
+            },
+            "url": "{{baseUrl}}/api/companies"
+          }
+        },
+        {
+          "name": "Lihat Companies",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/companies"
+          }
+        },
+        {
+          "name": "Buat Lowongan Job",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company_id\": 3,\n  \"title\": \"Backend Developer\",\n  \"description\": \"Membangun API REST\",\n  \"location\": \"Jakarta\",\n  \"required_skills\": [\"nodejs\", \"mysql\", \"express\"],\n  \"status\": \"open\"\n}"
+            },
+            "url": "{{baseUrl}}/api/jobs"
+          }
+        },
+        {
+          "name": "Matching Kandidat per Job",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/matching/job/1"
+          }
+        },
+        {
+          "name": "Lihat Pelamar per Job",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/applications/job/1"
+          }
+        },
+        {
+          "name": "Update Status Lamaran",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Reviewed\"\n}"
+            },
+            "url": "{{baseUrl}}/api/applications/1/status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recruiter",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{recruiterToken}}" }],
+            "url": "{{baseUrl}}/api/dashboard"
+          }
+        },
+        {
+          "name": "Matching Kandidat per Job",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{recruiterToken}}" }],
+            "url": "{{baseUrl}}/api/matching/job/1"
+          }
+        },
+        {
+          "name": "Shortlist Kandidat",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{recruiterToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"application_id\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/shortlists"
+          }
+        },
+        {
+          "name": "Lihat Shortlist",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{recruiterToken}}" }],
+            "url": "{{baseUrl}}/api/shortlists"
+          }
+        },
+        {
+          "name": "Jadwalkan Interview",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{recruiterToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduledAt\": \"2026-06-15 10:00:00\",\n  \"meetingLink\": \"https://meet.google.com/abc\",\n  \"location\": \"Online\",\n  \"notes\": \"Interview teknis\"\n}"
+            },
+            "url": "{{baseUrl}}/api/interviews/applications/1"
+          }
+        },
+        {
+          "name": "Update Status Lamaran",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{recruiterToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Shortlist\"\n}"
+            },
+            "url": "{{baseUrl}}/api/applications/1/status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Applicant",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{applicantToken}}" }],
+            "url": "{{baseUrl}}/api/dashboard"
+          }
+        },
+        {
+          "name": "Isi Profile + Skills",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{applicantToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Budi Praintern\",\n  \"location\": \"Bandung\",\n  \"education\": \"S1 Informatika\",\n  \"experienceYears\": 1,\n  \"skills\": [\"nodejs\", \"mysql\", \"javascript\"],\n  \"cvUrl\": \"https://example.com/cv.pdf\"\n}"
+            },
+            "url": "{{baseUrl}}/api/profiles/me"
+          }
+        },
+        {
+          "name": "Lihat Lowongan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/jobs"
+          }
+        },
+        {
+          "name": "Matching Job untuk Saya",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{applicantToken}}" }],
+            "url": "{{baseUrl}}/api/matching/user"
+          }
+        },
+        {
+          "name": "Melamar Kerja",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{applicantToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job_id\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/applications"
+          }
+        },
+        {
+          "name": "Lihat Lamaran Saya",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{applicantToken}}" }],
+            "url": "{{baseUrl}}/api/applications"
+          }
+        },
+        {
+          "name": "Jadwal Interview Saya",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{applicantToken}}" }],
+            "url": "{{baseUrl}}/api/interviews/my"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+@baseUrl = http://localhost:3000
+@adminToken = PASTE_TOKEN_ADMIN_DISINI
+
+### Dashboard Admin
+GET {{baseUrl}}/api/dashboard
+Authorization: Bearer {{adminToken}}
+
+### Buat Company
+POST {{baseUrl}}/api/companies
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "PT Tetile",
+  "email": "hr@textile.com",
+  "description": "Perusahaan Tekstil",
+  "location": "Jakarta"
+}
+
+### Lihat Semua Company
+GET {{baseUrl}}/api/companies
+Authorization: Bearer {{adminToken}}
+
+### Buat Lowongan Job
+POST {{baseUrl}}/api/jobs
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "company_id": 3,
+  "title": "Backend Developer",
+  "description": "Membangun API REST",
+  "location": "Jakarta",
+  "required_skills": ["nodejs", "mysql", "express"],
+  "status": "open"
+}
+
+### Update Job
+PUT {{baseUrl}}/api/jobs/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "title": "Backend Developer",
+  "description": "Membangun API REST updated",
+  "location": "Jakarta",
+  "required_skills": ["nodejs", "mysql", "express"],
+  "status": "open"
+}
+
+### Hapus Job
+DELETE {{baseUrl}}/api/jobs/1
+Authorization: Bearer {{adminToken}}
+
+### Matching Kandidat per Job (admin)
+GET {{baseUrl}}/api/matching/job/1
+Authorization: Bearer {{adminToken}}
+
+### Lihat Pelamar per Job
+GET {{baseUrl}}/api/applications/job/1
+Authorization: Bearer {{adminToken}}
+
+### Update Status Lamaran
+PATCH {{baseUrl}}/api/applications/1/status
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "Reviewed"
+}
+
+### Hapus Lamaran
+DELETE {{baseUrl}}/api/applications/1
+Authorization: Bearer {{adminToken}}

@@ -1,0 +1,76 @@
+@baseUrl = http://localhost:3000
+@recruiterToken = PASTE_TOKEN_RECRUITER_DISINI
+
+### Dashboard Recruiter
+GET {{baseUrl}}/api/dashboard
+Authorization: Bearer {{recruiterToken}}
+
+### Matching Kandidat untuk Job
+GET {{baseUrl}}/api/matching/job/1
+Authorization: Bearer {{recruiterToken}}
+
+### Lihat Pelamar per Job
+GET {{baseUrl}}/api/applications/job/1
+Authorization: Bearer {{recruiterToken}}
+
+### Update Status Lamaran
+PATCH {{baseUrl}}/api/applications/1/status
+Authorization: Bearer {{recruiterToken}}
+Content-Type: application/json
+
+{
+  "status": "Shortlist"
+}
+
+### Tambah ke Shortlist
+POST {{baseUrl}}/api/shortlists
+Authorization: Bearer {{recruiterToken}}
+Content-Type: application/json
+
+{
+  "application_id": 1
+}
+
+### Lihat Shortlist
+GET {{baseUrl}}/api/shortlists
+Authorization: Bearer {{recruiterToken}}
+
+### Hapus dari Shortlist
+DELETE {{baseUrl}}/api/shortlists/1
+Authorization: Bearer {{recruiterToken}}
+
+### Jadwalkan Interview
+POST {{baseUrl}}/api/interviews/applications/1
+Authorization: Bearer {{recruiterToken}}
+Content-Type: application/json
+
+{
+  "scheduledAt": "2026-06-15 10:00:00",
+  "meetingLink": "https://meet.google.com/abc",
+  "location": "Online",
+  "notes": "Interview teknis"
+}
+
+### Lihat Interview per Lamaran
+GET {{baseUrl}}/api/interviews/applications/1
+Authorization: Bearer {{recruiterToken}}
+
+### Lihat Semua Interview
+GET {{baseUrl}}/api/interviews
+Authorization: Bearer {{recruiterToken}}
+
+### Update Interview
+PUT {{baseUrl}}/api/interviews/1
+Authorization: Bearer {{recruiterToken}}
+Content-Type: application/json
+
+{
+  "scheduledAt": "2026-06-16 14:00:00",
+  "meetingLink": "https://meet.google.com/xyz",
+  "location": "Online",
+  "notes": "Reschedule"
+}
+
+### Hapus Interview
+DELETE {{baseUrl}}/api/interviews/1
+Authorization: Bearer {{recruiterToken}}
