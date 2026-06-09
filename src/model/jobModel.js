@@ -1,66 +1,26 @@
-const pool = require("../config/db");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
 
-async function getJobById(id) {
-  const [rows] = await pool.execute(
-    `SELECT j.*, c.name AS company_name
-     FROM jobs j
-     JOIN companies c ON j.company_id = c.id
-     WHERE j.id = ?
-     LIMIT 1`,
-    [id]
-  );
-  return rows[0] || null;
-}
+const Job = sequelize.define(
+  "Job",
+  {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    company_id: { type: DataTypes.INTEGER, allowNull: false },
+    title: { type: DataTypes.STRING(160), allowNull: false },
+    description: DataTypes.TEXT,
+    location: DataTypes.STRING(120),
+    required_skills: DataTypes.JSON,
+    status: {
+      type: DataTypes.ENUM("open", "closed"),
+      defaultValue: "open",
+    },
+  },
+  {
+    tableName: "jobs",
+    timestamps: true,
+    createdAt: "created_at",
+    updatedAt: false,
+  }
+);
 
-const Job = {
-  getAll: () =>
-    pool.execute(`
-      SELECT j.*, c.name AS company_name
-      FROM jobs j
-      JOIN companies c ON j.company_id = c.id
-      ORDER BY j.created_at DESC
-    `),
-
-  getById: (id) =>
-    pool.execute(
-      `SELECT j.*, c.name AS company_name
-       FROM jobs j
-       JOIN companies c ON j.company_id = c.id
-       WHERE j.id = ?
-       LIMIT 1`,
-      [id]
-    ),
-
-  create: (data) =>
-    pool.execute(
-      `INSERT INTO jobs (company_id, title, description, location, required_skills, status)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [
-        data.company_id,
-        data.title,
-        data.description,
-        data.location || null,
-        data.required_skills ? JSON.stringify(data.required_skills) : null,
-        data.status || "open",
-      ]
-    ),
-
-  update: (id, data) =>
-    pool.execute(
-      `UPDATE jobs SET title = ?, description = ?, location = ?,
-        required_skills = ?, status = ?
-       WHERE id = ?`,
-      [
-        data.title,
-        data.description,
-        data.location || null,
-        data.required_skills ? JSON.stringify(data.required_skills) : null,
-        data.status || "open",
-        id,
-      ]
-    ),
-
-  delete: (id) => pool.execute("DELETE FROM jobs WHERE id = ?", [id]),
-};
-
-module.exports = { ...Job, getJobById };
+module.exports = Job;

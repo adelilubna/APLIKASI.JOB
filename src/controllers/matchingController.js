@@ -1,5 +1,4 @@
-const { getJobById } = require("../model/jobModel");
-const pool = require("../config/db");
+const { Job, Company, User, Profile } = require("../model/index");
 
 function toArray(value) {
   if (!value) return [];
@@ -29,72 +28,72 @@ exports.matchCandidatesForJob = async (req, res) => {
   const jobId = Number(req.params.job_id);
   if (!jobId) return res.status(400).json({ message: "Invalid job_id" });
 
-  const job = await getJobById(jobId);
-  if (!job) return res.status(404).json({ message: "Job not found" });
+  try {
+    const job = await Job.findByPk(jobId, {
+      include: [{ model: Company, as: "company", attributes: ["id", "name"] }],
+    });
+    if (!job) return res.status(404).json({ message: "Job not found" });
 
-  const requiredSkills = toArray(job.required_skills);
+    const requiredSkills = toArray(job.required_skills);
 
-  const sql = `
-    SELECT u.id AS user_id, u.email, u.role, p.full_name, p.location, p.education, p.experience_years, p.skills
-    FROM users u
-    JOIN profiles p ON p.user_id = u.id
-    WHERE u.role IN ('applicant','user')
-  `;
-  const [rows] = await pool.execute(sql);
+    const candidates = await User.findAll({
+      where: { role: ["applicant", "user"] },
+      attributes: ["id", "email", "role"],
+      include: [{ model: Profile, as: "profile" }],
+    });
 
-  const matches = rows
-    .map((r) => {
-      const candidateSkills = toArray(r.skills);
-      const matchScore = scoreSkills(requiredSkills, candidateSkills);
-      return {
-        userId: r.user_id,
-        email: r.email,
-        fullName: r.full_name,
-        location: r.location,
-        education: r.education,
-        experienceYears: r.experience_years,
-        matchScore,
-      };
-    })
-    .sort((a, b) => b.matchScore - a.matchScore);
+    const matches = candidates
+      .filter((u) => u.profile)
+      .map((u) => {
+        const candidateSkills = toArray(u.profile.skills);
+        return {
+          userId: u.id,
+          email: u.email,
+          fullName: u.profile.full_name,
+          location: u.profile.location,
+          education: u.profile.education,
+          experienceYears: u.profile.experience_years,
+          matchScore: scoreSkills(requiredSkills, candidateSkills),
+        };
+      })
+      .sort((a, b) => b.matchScore - a.matchScore);
 
-  res.json({
-    job: { id: jobId, title: job.title, requiredSkills },
-    matches,
-  });
+    res.json({ job: { id: jobId, title: job.title, requiredSkills }, matches });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 exports.matchJobsForUser = async (req, res) => {
-  const userId = req.user.id;
+  try {
+    const profile = await Profile.findOne({ where: { user_id: req.user.id } });
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found. Complete your profile first." });
+    }
 
-  const [profileRows] = await pool.execute("SELECT * FROM profiles WHERE user_id = ? LIMIT 1", [userId]);
-  if (!profileRows.length) {
-    return res.status(404).json({ message: "Profile not found. Complete your profile first." });
+    const candidateSkills = toArray(profile.skills);
+
+    const jobs = await Job.findAll({
+      where: { status: "open" },
+      include: [{ model: Company, as: "company", attributes: ["id", "name"] }],
+    });
+
+    const matches = jobs
+      .map((job) => {
+        const requiredSkills = toArray(job.required_skills);
+        return {
+          jobId: job.id,
+          title: job.title,
+          location: job.location,
+          companyName: job.company?.name,
+          requiredSkills,
+          matchScore: scoreSkills(requiredSkills, candidateSkills),
+        };
+      })
+      .sort((a, b) => b.matchScore - a.matchScore);
+
+    res.json({ matches });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-
-  const candidateSkills = toArray(profileRows[0].skills);
-
-  const [jobs] = await pool.execute(
-    `SELECT j.id, j.title, j.location, j.required_skills, c.name AS company_name
-     FROM jobs j
-     JOIN companies c ON j.company_id = c.id
-     WHERE j.status = 'open'`
-  );
-
-  const matches = jobs
-    .map((job) => {
-      const requiredSkills = toArray(job.required_skills);
-      const matchScore = scoreSkills(requiredSkills, candidateSkills);
-      return {
-        jobId: job.id,
-        title: job.title,
-        location: job.location,
-        companyName: job.company_name,
-        requiredSkills,
-        matchScore,
-      };
-    })
-    .sort((a, b) => b.matchScore - a.matchScore);
-
-  res.json({ matches });
 };

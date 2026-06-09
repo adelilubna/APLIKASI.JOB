@@ -1,21 +1,18 @@
-const Application = require("../model/applicationModel");
-const Job = require("../model/jobModel");
+const { Application, Job, Company, User } = require("../model/index");
 
-const VALID_STATUS = new Set([
-  "Applied",
-  "Reviewed",
-  "Shortlist",
-  "Interview",
-  "Accepted",
-  "Rejected",
-]);
+const VALID_STATUS = new Set(["Applied", "Reviewed", "Shortlist", "Interview", "Accepted", "Rejected"]);
 
 const getAll = async (req, res) => {
   try {
-    const [rows] =
-      req.user.role === "admin"
-        ? await Application.getAll()
-        : await Application.getByUser(req.user.id);
+    const where = req.user.role === "admin" ? {} : { applicant_user_id: req.user.id };
+    const rows = await Application.findAll({
+      where,
+      include: [
+        { model: User, as: "applicant", attributes: ["id", "email"] },
+        { model: Job, as: "job", attributes: ["id", "title"], include: [{ model: Company, as: "company", attributes: ["id", "name"] }] },
+      ],
+      order: [["created_at", "DESC"]],
+    });
     res.json({ success: true, total: rows.length, data: rows });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -24,12 +21,14 @@ const getAll = async (req, res) => {
 
 const getById = async (req, res) => {
   try {
-    const [rows] = await Application.getById(req.params.id);
-    if (!rows.length) {
-      return res.status(404).json({ success: false, message: "Lamaran tidak ditemukan." });
-    }
+    const app = await Application.findByPk(req.params.id, {
+      include: [
+        { model: User, as: "applicant", attributes: ["id", "email"] },
+        { model: Job, as: "job", attributes: ["id", "title"] },
+      ],
+    });
+    if (!app) return res.status(404).json({ success: false, message: "Lamaran tidak ditemukan." });
 
-    const app = rows[0];
     if (
       req.user.role !== "admin" &&
       req.user.role !== "recruiter" &&
@@ -46,32 +45,23 @@ const getById = async (req, res) => {
 
 const create = async (req, res) => {
   const { job_id } = req.body;
-  if (!job_id) {
-    return res.status(400).json({ success: false, message: "job_id wajib diisi." });
-  }
+  if (!job_id) return res.status(400).json({ success: false, message: "job_id wajib diisi." });
   if (Number.isNaN(Number(job_id))) {
     return res.status(400).json({ success: false, message: "job_id harus angka." });
   }
 
   try {
-    const [jobRows] = await Job.getById(Number(job_id));
-    if (!jobRows.length) {
-      return res.status(404).json({ success: false, message: "Lowongan tidak ditemukan." });
-    }
+    const job = await Job.findByPk(Number(job_id));
+    if (!job) return res.status(404).json({ success: false, message: "Lowongan tidak ditemukan." });
 
-    const [dup] = await Application.checkDuplicate(job_id, req.user.id);
-    if (dup.length) {
-      return res.status(409).json({ success: false, message: "Kamu sudah melamar pekerjaan ini." });
-    }
+    const dup = await Application.findOne({ where: { job_id: Number(job_id), applicant_user_id: req.user.id } });
+    if (dup) return res.status(409).json({ success: false, message: "Kamu sudah melamar pekerjaan ini." });
 
-    const [result] = await Application.create({
-      job_id: Number(job_id),
-      applicant_user_id: req.user.id,
-    });
+    const app = await Application.create({ job_id: Number(job_id), applicant_user_id: req.user.id });
     res.status(201).json({
       success: true,
       message: "Lamaran berhasil dikirim.",
-      data: { id: result.insertId, job_id: Number(job_id), status: "Applied" },
+      data: { id: app.id, job_id: app.job_id, status: app.status },
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -88,12 +78,10 @@ const updateStatus = async (req, res) => {
   }
 
   try {
-    const [rows] = await Application.getById(req.params.id);
-    if (!rows.length) {
-      return res.status(404).json({ success: false, message: "Lamaran tidak ditemukan." });
-    }
+    const app = await Application.findByPk(req.params.id);
+    if (!app) return res.status(404).json({ success: false, message: "Lamaran tidak ditemukan." });
 
-    await Application.updateStatus(req.params.id, status);
+    await app.update({ status });
     res.json({ success: true, message: `Status lamaran diubah menjadi '${status}'.` });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -102,7 +90,10 @@ const updateStatus = async (req, res) => {
 
 const getByJob = async (req, res) => {
   try {
-    const [rows] = await Application.getByJob(req.params.job_id);
+    const rows = await Application.findAll({
+      where: { job_id: req.params.job_id },
+      include: [{ model: User, as: "applicant", attributes: ["id", "email"] }],
+    });
     res.json({ success: true, total: rows.length, data: rows });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -111,12 +102,9 @@ const getByJob = async (req, res) => {
 
 const remove = async (req, res) => {
   try {
-    const [rows] = await Application.getById(req.params.id);
-    if (!rows.length) {
-      return res.status(404).json({ success: false, message: "Lamaran tidak ditemukan." });
-    }
-
-    await Application.delete(req.params.id);
+    const app = await Application.findByPk(req.params.id);
+    if (!app) return res.status(404).json({ success: false, message: "Lamaran tidak ditemukan." });
+    await app.destroy();
     res.json({ success: true, message: "Lamaran berhasil dihapus." });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

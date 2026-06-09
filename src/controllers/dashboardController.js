@@ -1,17 +1,19 @@
-const pool = require("../config/db");
+const { fn, col } = require("sequelize");
+const { User, Company, Job, Application, Interview, Shortlist } = require("../model/index");
 
 const getDashboard = async (req, res) => {
   const { id, role } = req.user;
 
   try {
     if (role === "admin") {
-      const [[{ total_users }]] = await pool.execute("SELECT COUNT(*) AS total_users FROM users");
-      const [[{ total_companies }]] = await pool.execute("SELECT COUNT(*) AS total_companies FROM companies");
-      const [[{ total_jobs }]] = await pool.execute("SELECT COUNT(*) AS total_jobs FROM jobs");
-      const [[{ total_applications }]] = await pool.execute(
-        "SELECT COUNT(*) AS total_applications FROM applications"
-      );
-      const [[{ total_interviews }]] = await pool.execute("SELECT COUNT(*) AS total_interviews FROM interviews");
+      const [total_users, total_companies, total_jobs, total_applications, total_interviews] =
+        await Promise.all([
+          User.count(),
+          Company.count(),
+          Job.count(),
+          Application.count(),
+          Interview.count(),
+        ]);
 
       return res.json({
         success: true,
@@ -21,34 +23,34 @@ const getDashboard = async (req, res) => {
     }
 
     if (role === "recruiter") {
-      const [[{ total_jobs }]] = await pool.execute(
-        `SELECT COUNT(*) AS total_jobs FROM jobs j
-         JOIN companies c ON j.company_id = c.id
-         WHERE c.owner_user_id = ?`,
-        [id]
-      );
-
-      const [[{ total_applications }]] = await pool.execute(
-        `SELECT COUNT(*) AS total_applications FROM applications a
-         JOIN jobs j ON a.job_id = j.id
-         JOIN companies c ON j.company_id = c.id
-         WHERE c.owner_user_id = ?`,
-        [id]
-      );
-
-      const [[{ total_shortlisted }]] = await pool.execute(
-        "SELECT COUNT(*) AS total_shortlisted FROM shortlists WHERE recruiter_id = ?",
-        [id]
-      );
-
-      const [[{ total_interviews }]] = await pool.execute(
-        `SELECT COUNT(*) AS total_interviews FROM interviews i
-         JOIN applications a ON i.application_id = a.id
-         JOIN jobs j ON a.job_id = j.id
-         JOIN companies c ON j.company_id = c.id
-         WHERE c.owner_user_id = ?`,
-        [id]
-      );
+      const [total_jobs, total_applications, total_shortlisted, total_interviews] = await Promise.all([
+        Job.count({ include: [{ model: Company, as: "company", where: { owner_user_id: id } }] }),
+        Application.count({
+          include: [
+            {
+              model: Job,
+              as: "job",
+              include: [{ model: Company, as: "company", where: { owner_user_id: id } }],
+            },
+          ],
+        }),
+        Shortlist.count({ where: { recruiter_id: id } }),
+        Interview.count({
+          include: [
+            {
+              model: Application,
+              as: "application",
+              include: [
+                {
+                  model: Job,
+                  as: "job",
+                  include: [{ model: Company, as: "company", where: { owner_user_id: id } }],
+                },
+              ],
+            },
+          ],
+        }),
+      ]);
 
       return res.json({
         success: true,
@@ -58,23 +60,24 @@ const getDashboard = async (req, res) => {
     }
 
     if (role === "applicant" || role === "user") {
-      const [[{ total_applied }]] = await pool.execute(
-        "SELECT COUNT(*) AS total_applied FROM applications WHERE applicant_user_id = ?",
-        [id]
-      );
-
-      const [status_breakdown] = await pool.execute(
-        `SELECT status, COUNT(*) AS count FROM applications
-         WHERE applicant_user_id = ? GROUP BY status`,
-        [id]
-      );
-
-      const [[{ total_interviews }]] = await pool.execute(
-        `SELECT COUNT(*) AS total_interviews FROM interviews i
-         JOIN applications a ON i.application_id = a.id
-         WHERE a.applicant_user_id = ?`,
-        [id]
-      );
+      const [total_applied, status_breakdown, total_interviews] = await Promise.all([
+        Application.count({ where: { applicant_user_id: id } }),
+        Application.findAll({
+          where: { applicant_user_id: id },
+          attributes: ["status", [fn("COUNT", col("id")), "count"]],
+          group: ["status"],
+          raw: true,
+        }),
+        Interview.count({
+          include: [
+            {
+              model: Application,
+              as: "application",
+              where: { applicant_user_id: id },
+            },
+          ],
+        }),
+      ]);
 
       return res.json({
         success: true,

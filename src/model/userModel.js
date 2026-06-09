@@ -1,21 +1,23 @@
-const pool = require("../config/db");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
 
-async function createUser({ email, passwordHash, role }) {
-  const sql = "INSERT INTO users (email, password, role) VALUES (?, ?, ?)";
-  const [result] = await pool.execute(sql, [email, passwordHash, role]);
-  return result.insertId;
-}
+const User = sequelize.define(
+  "User",
+  {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    email: { type: DataTypes.STRING(100), allowNull: false, unique: true },
+    password: { type: DataTypes.STRING(255), allowNull: false },
+    role: {
+      type: DataTypes.ENUM("admin", "applicant", "company", "recruiter", "hrd", "user"),
+      defaultValue: "user",
+    },
+  },
+  {
+    tableName: "users",
+    timestamps: true,
+    createdAt: "created_at",
+    updatedAt: false,
+  }
+);
 
-async function findUserByEmail(email) {
-  const sql = "SELECT * FROM users WHERE email = ? LIMIT 1";
-  const [rows] = await pool.execute(sql, [email]);
-  return rows[0] || null;
-}
-
-async function findUserById(id) {
-  const sql = "SELECT id, email, role FROM users WHERE id = ? LIMIT 1";
-  const [rows] = await pool.execute(sql, [id]);
-  return rows[0] || null;
-}
-
-module.exports = { createUser, findUserByEmail, findUserById };
+module.exports = User;

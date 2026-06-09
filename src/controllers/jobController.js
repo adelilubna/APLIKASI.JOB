@@ -1,10 +1,13 @@
-const Job = require("../model/jobModel");
+const { Job, Company } = require("../model/index");
 
 const VALID_STATUS = new Set(["open", "closed"]);
 
 const getAll = async (req, res) => {
   try {
-    const [rows] = await Job.getAll();
+    const rows = await Job.findAll({
+      include: [{ model: Company, as: "company", attributes: ["id", "name"] }],
+      order: [["created_at", "DESC"]],
+    });
     res.json({ success: true, total: rows.length, data: rows });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -16,11 +19,11 @@ const getById = async (req, res) => {
   if (!id) return res.status(400).json({ success: false, message: "id wajib angka." });
 
   try {
-    const [rows] = await Job.getById(id);
-    if (!rows.length) {
-      return res.status(404).json({ success: false, message: "Lowongan tidak ditemukan." });
-    }
-    res.json({ success: true, data: rows[0] });
+    const job = await Job.findByPk(id, {
+      include: [{ model: Company, as: "company", attributes: ["id", "name"] }],
+    });
+    if (!job) return res.status(404).json({ success: false, message: "Lowongan tidak ditemukan." });
+    res.json({ success: true, data: job });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -30,10 +33,7 @@ const create = async (req, res) => {
   const { company_id, title, description, location, required_skills, status } = req.body;
 
   if (!company_id || !title || !description) {
-    return res.status(400).json({
-      success: false,
-      message: "company_id, title, dan description wajib diisi.",
-    });
+    return res.status(400).json({ success: false, message: "company_id, title, dan description wajib diisi." });
   }
   if (Number.isNaN(Number(company_id))) {
     return res.status(400).json({ success: false, message: "company_id harus angka." });
@@ -43,19 +43,15 @@ const create = async (req, res) => {
   }
 
   try {
-    const [result] = await Job.create({
+    const job = await Job.create({
       company_id: Number(company_id),
       title: String(title).trim(),
       description: String(description),
-      location,
-      required_skills,
+      location: location || null,
+      required_skills: required_skills || null,
       status: status || "open",
     });
-    res.status(201).json({
-      success: true,
-      message: "Lowongan berhasil dibuat.",
-      data: { id: result.insertId },
-    });
+    res.status(201).json({ success: true, message: "Lowongan berhasil dibuat.", data: { id: job.id } });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -74,17 +70,15 @@ const update = async (req, res) => {
   }
 
   try {
-    const [rows] = await Job.getById(id);
-    if (!rows.length) {
-      return res.status(404).json({ success: false, message: "Lowongan tidak ditemukan." });
-    }
+    const job = await Job.findByPk(id);
+    if (!job) return res.status(404).json({ success: false, message: "Lowongan tidak ditemukan." });
 
-    await Job.update(id, {
+    await job.update({
       title: String(title).trim(),
       description: String(description),
-      location,
-      required_skills,
-      status: status || rows[0].status,
+      location: location || null,
+      required_skills: required_skills || null,
+      status: status || job.status,
     });
     res.json({ success: true, message: "Lowongan berhasil diupdate." });
   } catch (err) {
@@ -97,11 +91,9 @@ const remove = async (req, res) => {
   if (!id) return res.status(400).json({ success: false, message: "id wajib angka." });
 
   try {
-    const [rows] = await Job.getById(id);
-    if (!rows.length) {
-      return res.status(404).json({ success: false, message: "Lowongan tidak ditemukan." });
-    }
-    await Job.delete(id);
+    const job = await Job.findByPk(id);
+    if (!job) return res.status(404).json({ success: false, message: "Lowongan tidak ditemukan." });
+    await job.destroy();
     res.json({ success: true, message: "Lowongan berhasil dihapus." });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

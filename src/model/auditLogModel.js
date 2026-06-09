@@ -1,22 +1,24 @@
-const pool = require("../config/db");
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db");
 
-async function createAuditLog({ actorUserId, entityType, entityId, action, fromStatus, toStatus, meta }) {
-  const sql = `
-    INSERT INTO audit_logs (actor_user_id, entity_type, entity_id, action, from_status, to_status, meta)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `;
-  const metaJson = meta ? JSON.stringify(meta) : null;
-  const [result] = await pool.execute(sql, [
-    actorUserId || null,
-    entityType,
-    entityId,
-    action,
-    fromStatus || null,
-    toStatus || null,
-    metaJson,
-  ]);
-  return result.insertId;
-}
+const AuditLog = sequelize.define(
+  "AuditLog",
+  {
+    id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+    actor_user_id: { type: DataTypes.INTEGER, allowNull: true },
+    entity_type: { type: DataTypes.STRING(40), allowNull: false },
+    entity_id: { type: DataTypes.INTEGER, allowNull: false },
+    action: { type: DataTypes.STRING(40), allowNull: false },
+    from_status: DataTypes.STRING(40),
+    to_status: DataTypes.STRING(40),
+    meta: DataTypes.JSON,
+  },
+  {
+    tableName: "audit_logs",
+    timestamps: true,
+    createdAt: "created_at",
+    updatedAt: false,
+  }
+);
 
-module.exports = { createAuditLog };
-
+module.exports = AuditLog;
