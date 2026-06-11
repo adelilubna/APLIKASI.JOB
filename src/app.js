@@ -1,8 +1,10 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
 const companyRoutes = require("./routes/companyRoutes");
 const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
@@ -19,12 +21,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Static files untuk upload CV, foto profil, dan logo perusahaan
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 app.get("/api/health", (req, res) => {
   res.json({ ok: true });
 });
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/categories", categoryRoutes);
 app.use("/api/companies", companyRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);

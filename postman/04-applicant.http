@@ -1,51 +1,128 @@
-@baseUrl = http://localhost:3000
+@baseUrl        = http://localhost:3000
 @applicantToken = PASTE_TOKEN_APPLICANT_DISINI
+
+
+### ══════════════════════════════════════════
+###  DASHBOARD
+### ══════════════════════════════════════════
 
 ### Dashboard Applicant
 GET {{baseUrl}}/api/dashboard
 Authorization: Bearer {{applicantToken}}
 
-### Lihat Profile Saya
+
+### ══════════════════════════════════════════
+###  PROFIL PELAMAR
+### ══════════════════════════════════════════
+
+### Lihat Profil Saya
 GET {{baseUrl}}/api/profiles/me
 Authorization: Bearer {{applicantToken}}
 
-### Isi / Update Profile + Skills
+### Update Profil (JSON)
 PUT {{baseUrl}}/api/profiles/me
 Authorization: Bearer {{applicantToken}}
 Content-Type: application/json
 
 {
-  "fullName": "Budi Praintern",
-  "location": "Bandung",
-  "education": "S1 Informatika",
+  "fullName": "Budi Santoso",
+  "phone": "081234567890",
+  "gender": "laki-laki",
+  "dateOfBirth": "2000-05-15",
+  "bio": "Fresh graduate S1 Informatika dengan passion di backend development",
+  "location": "Jakarta",
+  "education": "S1 Teknik Informatika - Universitas Indonesia",
+  "educationLevel": "S1",
   "experienceYears": 1,
-  "skills": ["nodejs", "mysql", "javascript"],
-  "cvUrl": "https://example.com/cv.pdf"
+  "skills": ["nodejs", "mysql", "express", "javascript", "git"],
+  "linkedinUrl": "https://linkedin.com/in/budisantoso",
+  "githubUrl": "https://github.com/budisantoso"
 }
 
-### Lihat Lowongan (publik, tanpa token)
+### Upload CV (multipart/form-data)
+### Field: cv  |  Tipe: file  |  Format: PDF/DOC/DOCX  |  Max: 5MB
+POST {{baseUrl}}/api/profiles/me/cv
+Authorization: Bearer {{applicantToken}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="cv"; filename="cv_budi.pdf"
+Content-Type: application/pdf
+
+< ./cv_budi.pdf
+------FormBoundary--
+
+### Upload Foto Profil (multipart/form-data)
+### Field: photo  |  Tipe: file  |  Format: JPG/PNG/WEBP  |  Max: 2MB
+POST {{baseUrl}}/api/profiles/me/photo
+Authorization: Bearer {{applicantToken}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="photo"; filename="foto_budi.jpg"
+Content-Type: image/jpeg
+
+< ./foto_budi.jpg
+------FormBoundary--
+
+
+### ══════════════════════════════════════════
+###  LOWONGAN KERJA
+### ══════════════════════════════════════════
+
+### Lihat Semua Lowongan (publik, tanpa token)
 GET {{baseUrl}}/api/jobs
 
-### Matching Job untuk Saya
+### Filter Lowongan
+GET {{baseUrl}}/api/jobs?keyword=developer&location=Jakarta&job_type=full-time&category_id=1
+
+### Detail Lowongan
+GET {{baseUrl}}/api/jobs/1
+
+### Lihat Kategori (publik)
+GET {{baseUrl}}/api/categories
+
+
+### ══════════════════════════════════════════
+###  MATCHING JOB
+### ══════════════════════════════════════════
+
+### Lowongan yang Cocok untuk Saya
+### (harus isi profil dulu agar matching bekerja)
 GET {{baseUrl}}/api/matching/user
 Authorization: Bearer {{applicantToken}}
 
-### Melamar Kerja
+
+### ══════════════════════════════════════════
+###  LAMARAN KERJA
+### ══════════════════════════════════════════
+
+### Melamar Kerja (dengan cover letter)
 POST {{baseUrl}}/api/applications
 Authorization: Bearer {{applicantToken}}
 Content-Type: application/json
 
 {
-  "job_id": 1
+  "job_id": 1,
+  "cover_letter": "Perkenalkan, saya Budi Santoso, lulusan S1 Informatika UI. Saya sangat tertarik dengan posisi Backend Developer di perusahaan Anda karena saya memiliki pengalaman di Node.js dan MySQL. Saya yakin dapat berkontribusi secara maksimal untuk tim Anda."
 }
 
-### Lihat Lamaran Saya
+### Lihat Semua Lamaran Saya
 GET {{baseUrl}}/api/applications
 Authorization: Bearer {{applicantToken}}
 
 ### Detail Lamaran
 GET {{baseUrl}}/api/applications/1
 Authorization: Bearer {{applicantToken}}
+
+### Hapus Lamaran (batalkan)
+DELETE {{baseUrl}}/api/applications/1
+Authorization: Bearer {{applicantToken}}
+
+
+### ══════════════════════════════════════════
+###  INTERVIEW
+### ══════════════════════════════════════════
 
 ### Jadwal Interview Saya
 GET {{baseUrl}}/api/interviews/my

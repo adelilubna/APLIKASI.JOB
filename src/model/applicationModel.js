@@ -7,8 +7,9 @@ const Application = sequelize.define(
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     job_id: { type: DataTypes.INTEGER, allowNull: false },
     applicant_user_id: { type: DataTypes.INTEGER, allowNull: false },
+    cover_letter: { type: DataTypes.TEXT, allowNull: true },
     status: {
-      type: DataTypes.ENUM("Applied", "Reviewed", "Shortlist", "Interview", "Accepted", "Rejected"),
+      type: DataTypes.ENUM("Applied", "Reviewed", "Interview", "Accepted", "Rejected"),
       defaultValue: "Applied",
     },
   },

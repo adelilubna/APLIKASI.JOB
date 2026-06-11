@@ -8,9 +8,11 @@ const User = sequelize.define(
     email: { type: DataTypes.STRING(100), allowNull: false, unique: true },
     password: { type: DataTypes.STRING(255), allowNull: false },
     role: {
-      type: DataTypes.ENUM("admin", "applicant", "company", "recruiter", "hrd", "user"),
-      defaultValue: "user",
+      type: DataTypes.ENUM("admin", "applicant", "company", "recruiter"),
+      defaultValue: "applicant",
     },
+    // Untuk recruiter: ID perusahaan tempat mereka bekerja (diset oleh admin/company)
+    company_id: { type: DataTypes.INTEGER, allowNull: true },
   },
   {
     tableName: "users",

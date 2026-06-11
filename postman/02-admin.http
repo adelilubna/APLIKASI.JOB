@@ -1,59 +1,155 @@
-@baseUrl = http://localhost:3000
+@baseUrl    = http://localhost:3000
 @adminToken = PASTE_TOKEN_ADMIN_DISINI
+
+
+### ══════════════════════════════════════════
+###  DASHBOARD
+### ══════════════════════════════════════════
 
 ### Dashboard Admin
 GET {{baseUrl}}/api/dashboard
 Authorization: Bearer {{adminToken}}
 
-### Buat Company
+
+### ══════════════════════════════════════════
+###  KATEGORI PEKERJAAN
+### ══════════════════════════════════════════
+
+### Lihat Semua Kategori (publik)
+GET {{baseUrl}}/api/categories
+
+### Detail Kategori
+GET {{baseUrl}}/api/categories/1
+
+### Buat Kategori
+POST {{baseUrl}}/api/categories
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Artificial Intelligence",
+  "description": "Pekerjaan di bidang AI dan Machine Learning"
+}
+
+### Update Kategori
+PUT {{baseUrl}}/api/categories/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "AI & Machine Learning",
+  "description": "Pekerjaan di bidang AI, ML, dan Data Science"
+}
+
+### Hapus Kategori
+DELETE {{baseUrl}}/api/categories/1
+Authorization: Bearer {{adminToken}}
+
+
+### ══════════════════════════════════════════
+###  PERUSAHAAN
+### ══════════════════════════════════════════
+
+### Lihat Semua Perusahaan
+GET {{baseUrl}}/api/companies
+Authorization: Bearer {{adminToken}}
+
+### Detail Perusahaan
+GET {{baseUrl}}/api/companies/1
+Authorization: Bearer {{adminToken}}
+
+### Buat Perusahaan (atas nama admin)
 POST {{baseUrl}}/api/companies
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "name": "PT Tetile",
-  "email": "hr@textile.com",
-  "description": "Perusahaan Tekstil",
-  "location": "Jakarta"
+  "name": "PT Teknologi Nusantara",
+  "email": "info@teknusantara.com",
+  "phone": "021-5551234",
+  "description": "Perusahaan teknologi software house",
+  "website": "https://teknusantara.com",
+  "location": "Jakarta",
+  "industry": "Teknologi Informasi",
+  "company_size": "51-200"
 }
 
-### Lihat Semua Company
-GET {{baseUrl}}/api/companies
+### Verifikasi Perusahaan
+PATCH {{baseUrl}}/api/companies/1/verify
 Authorization: Bearer {{adminToken}}
 
-### Buat Lowongan Job
+### Assign Recruiter ke Perusahaan
+### (recruiter_user_id = ID user dengan role recruiter)
+POST {{baseUrl}}/api/companies/1/assign-recruiter
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "recruiter_user_id": 4
+}
+
+### Hapus Perusahaan
+DELETE {{baseUrl}}/api/companies/1
+Authorization: Bearer {{adminToken}}
+
+
+### ══════════════════════════════════════════
+###  LOWONGAN KERJA
+### ══════════════════════════════════════════
+
+### Lihat Semua Lowongan
+GET {{baseUrl}}/api/jobs
+
+### Buat Lowongan (admin tentukan company_id)
 POST {{baseUrl}}/api/jobs
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "company_id": 3,
+  "company_id": 1,
+  "category_id": 1,
   "title": "Backend Developer",
-  "description": "Membangun API REST",
+  "description": "Membangun dan memelihara API REST menggunakan Node.js",
   "location": "Jakarta",
-  "required_skills": ["nodejs", "mysql", "express"],
+  "job_type": "full-time",
+  "education_required": "S1",
+  "experience_min_years": 2,
+  "salary_min": 8000000,
+  "salary_max": 15000000,
+  "required_skills": ["nodejs", "mysql", "express", "rest-api"],
+  "deadline": "2026-08-31",
   "status": "open"
 }
 
-### Update Job
+### Update Lowongan
 PUT {{baseUrl}}/api/jobs/1
 Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "title": "Backend Developer",
-  "description": "Membangun API REST updated",
+  "title": "Senior Backend Developer",
+  "description": "Membangun API REST skala enterprise",
   "location": "Jakarta",
-  "required_skills": ["nodejs", "mysql", "express"],
+  "job_type": "full-time",
+  "education_required": "S1",
+  "experience_min_years": 3,
+  "salary_min": 12000000,
+  "salary_max": 20000000,
+  "required_skills": ["nodejs", "mysql", "express", "redis", "docker"],
   "status": "open"
 }
 
-### Hapus Job
+### Hapus Lowongan
 DELETE {{baseUrl}}/api/jobs/1
 Authorization: Bearer {{adminToken}}
 
-### Matching Kandidat per Job (admin)
-GET {{baseUrl}}/api/matching/job/1
+
+### ══════════════════════════════════════════
+###  LAMARAN KERJA
+### ══════════════════════════════════════════
+
+### Lihat Semua Lamaran
+GET {{baseUrl}}/api/applications
 Authorization: Bearer {{adminToken}}
 
 ### Lihat Pelamar per Job
@@ -71,4 +167,14 @@ Content-Type: application/json
 
 ### Hapus Lamaran
 DELETE {{baseUrl}}/api/applications/1
+Authorization: Bearer {{adminToken}}
+
+
+### ══════════════════════════════════════════
+###  MATCHING KANDIDAT
+### ══════════════════════════════════════════
+
+### Match Kandidat untuk Job (skor 0–100)
+### Skills 50 + Pendidikan 20 + Pengalaman 20 + Lokasi 10
+GET {{baseUrl}}/api/matching/job/1
 Authorization: Bearer {{adminToken}}

@@ -1,26 +1,132 @@
-@baseUrl = http://localhost:3000
+@baseUrl        = http://localhost:3000
 @recruiterToken = PASTE_TOKEN_RECRUITER_DISINI
+
+# Catatan: Recruiter harus sudah di-assign ke perusahaan oleh admin
+# (POST /api/companies/:id/assign-recruiter)
+
+
+### ══════════════════════════════════════════
+###  DASHBOARD
+### ══════════════════════════════════════════
 
 ### Dashboard Recruiter
 GET {{baseUrl}}/api/dashboard
 Authorization: Bearer {{recruiterToken}}
 
-### Matching Kandidat untuk Job
-GET {{baseUrl}}/api/matching/job/1
+
+### ══════════════════════════════════════════
+###  LOWONGAN KERJA
+### ══════════════════════════════════════════
+
+### Lihat Semua Lowongan (publik)
+GET {{baseUrl}}/api/jobs
+
+### Filter Lowongan
+GET {{baseUrl}}/api/jobs?keyword=developer&location=Jakarta&job_type=full-time
+
+### Detail Lowongan
+GET {{baseUrl}}/api/jobs/1
+
+### Buat Lowongan (otomatis ke perusahaan recruiter)
+POST {{baseUrl}}/api/jobs
+Authorization: Bearer {{recruiterToken}}
+Content-Type: application/json
+
+{
+  "category_id": 1,
+  "title": "Frontend Developer",
+  "description": "Membangun tampilan web menggunakan React.js",
+  "location": "Remote",
+  "job_type": "contract",
+  "education_required": "D3",
+  "experience_min_years": 1,
+  "salary_min": 5000000,
+  "salary_max": 10000000,
+  "required_skills": ["react", "javascript", "html", "css"],
+  "deadline": "2026-07-31"
+}
+
+### Update Lowongan
+PUT {{baseUrl}}/api/jobs/1
+Authorization: Bearer {{recruiterToken}}
+Content-Type: application/json
+
+{
+  "title": "Senior Frontend Developer",
+  "description": "Membangun tampilan web enterprise",
+  "location": "Jakarta",
+  "experience_min_years": 2,
+  "salary_min": 8000000,
+  "salary_max": 15000000,
+  "status": "open"
+}
+
+### Tutup Lowongan
+PUT {{baseUrl}}/api/jobs/1
+Authorization: Bearer {{recruiterToken}}
+Content-Type: application/json
+
+{
+  "status": "closed"
+}
+
+
+### ══════════════════════════════════════════
+###  LAMARAN KERJA
+### ══════════════════════════════════════════
+
+### Lihat Semua Lamaran (di perusahaan recruiter)
+GET {{baseUrl}}/api/applications
 Authorization: Bearer {{recruiterToken}}
 
 ### Lihat Pelamar per Job
 GET {{baseUrl}}/api/applications/job/1
 Authorization: Bearer {{recruiterToken}}
 
-### Update Status Lamaran
+### Detail Lamaran
+GET {{baseUrl}}/api/applications/1
+Authorization: Bearer {{recruiterToken}}
+
+### Update Status → Reviewed
 PATCH {{baseUrl}}/api/applications/1/status
 Authorization: Bearer {{recruiterToken}}
 Content-Type: application/json
 
 {
-  "status": "Shortlist"
+  "status": "Reviewed"
 }
+
+### Update Status → Interview
+PATCH {{baseUrl}}/api/applications/1/status
+Authorization: Bearer {{recruiterToken}}
+Content-Type: application/json
+
+{
+  "status": "Interview"
+}
+
+### Update Status → Accepted
+PATCH {{baseUrl}}/api/applications/1/status
+Authorization: Bearer {{recruiterToken}}
+Content-Type: application/json
+
+{
+  "status": "Accepted"
+}
+
+### Update Status → Rejected
+PATCH {{baseUrl}}/api/applications/1/status
+Authorization: Bearer {{recruiterToken}}
+Content-Type: application/json
+
+{
+  "status": "Rejected"
+}
+
+
+### ══════════════════════════════════════════
+###  SHORTLIST KANDIDAT
+### ══════════════════════════════════════════
 
 ### Tambah ke Shortlist
 POST {{baseUrl}}/api/shortlists
@@ -28,10 +134,11 @@ Authorization: Bearer {{recruiterToken}}
 Content-Type: application/json
 
 {
-  "application_id": 1
+  "application_id": 1,
+  "notes": "Kandidat potensial, skill cocok dengan requirement"
 }
 
-### Lihat Shortlist
+### Lihat Shortlist Saya
 GET {{baseUrl}}/api/shortlists
 Authorization: Bearer {{recruiterToken}}
 
@@ -39,16 +146,21 @@ Authorization: Bearer {{recruiterToken}}
 DELETE {{baseUrl}}/api/shortlists/1
 Authorization: Bearer {{recruiterToken}}
 
+
+### ══════════════════════════════════════════
+###  JADWAL INTERVIEW
+### ══════════════════════════════════════════
+
 ### Jadwalkan Interview
 POST {{baseUrl}}/api/interviews/applications/1
 Authorization: Bearer {{recruiterToken}}
 Content-Type: application/json
 
 {
-  "scheduledAt": "2026-06-15 10:00:00",
-  "meetingLink": "https://meet.google.com/abc",
-  "location": "Online",
-  "notes": "Interview teknis"
+  "scheduledAt": "2026-07-15 10:00:00",
+  "meetingLink": "https://meet.google.com/abc-defg-hij",
+  "location": "Online via Google Meet",
+  "notes": "Interview teknis 60 menit — siapkan contoh project"
 }
 
 ### Lihat Interview per Lamaran
@@ -59,18 +171,28 @@ Authorization: Bearer {{recruiterToken}}
 GET {{baseUrl}}/api/interviews
 Authorization: Bearer {{recruiterToken}}
 
-### Update Interview
+### Update Interview (reschedule)
 PUT {{baseUrl}}/api/interviews/1
 Authorization: Bearer {{recruiterToken}}
 Content-Type: application/json
 
 {
-  "scheduledAt": "2026-06-16 14:00:00",
-  "meetingLink": "https://meet.google.com/xyz",
-  "location": "Online",
-  "notes": "Reschedule"
+  "scheduledAt": "2026-07-16 14:00:00",
+  "meetingLink": "https://zoom.us/j/123456789",
+  "location": "Zoom",
+  "notes": "Reschedule — interview HR + teknis gabungan"
 }
 
 ### Hapus Interview
 DELETE {{baseUrl}}/api/interviews/1
+Authorization: Bearer {{recruiterToken}}
+
+
+### ══════════════════════════════════════════
+###  MATCHING KANDIDAT
+### ══════════════════════════════════════════
+
+### Match Kandidat untuk Job
+### Response: skor 0–100 (Skills 50 + Edu 20 + Exp 20 + Lokasi 10)
+GET {{baseUrl}}/api/matching/job/1
 Authorization: Bearer {{recruiterToken}}

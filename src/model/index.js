@@ -1,6 +1,7 @@
 const User = require("./userModel");
 const Profile = require("./profileModel");
 const Company = require("./companyModel");
+const Category = require("./categoryModel");
 const Job = require("./jobModel");
 const Application = require("./applicationModel");
 const Interview = require("./interviewModel");
@@ -14,6 +15,10 @@ Profile.belongsTo(User, { foreignKey: "user_id", as: "user" });
 // User <-> Company (owner)
 User.hasMany(Company, { foreignKey: "owner_user_id", as: "companies" });
 Company.belongsTo(User, { foreignKey: "owner_user_id", as: "owner" });
+
+// Category <-> Job
+Category.hasMany(Job, { foreignKey: "category_id", as: "jobs" });
+Job.belongsTo(Category, { foreignKey: "category_id", as: "category" });
 
 // Company <-> Job
 Company.hasMany(Job, { foreignKey: "company_id", as: "jobs" });
@@ -43,4 +48,4 @@ Shortlist.belongsTo(User, { foreignKey: "recruiter_id", as: "recruiter" });
 User.hasMany(AuditLog, { foreignKey: "actor_user_id", as: "auditLogs" });
 AuditLog.belongsTo(User, { foreignKey: "actor_user_id", as: "actor" });
 
-module.exports = { User, Profile, Company, Job, Application, Interview, Shortlist, AuditLog };
+module.exports = { User, Profile, Company, Category, Job, Application, Interview, Shortlist, AuditLog };

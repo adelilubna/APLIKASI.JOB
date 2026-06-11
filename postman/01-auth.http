@@ -1,65 +1,106 @@
 @baseUrl = http://localhost:3000
 
-### Health Check (tanpa token)
+# ───────────────────────────────────────────
+# VARIABEL TOKEN — isi setelah login
+# ───────────────────────────────────────────
+@adminToken     = PASTE_TOKEN_ADMIN_DISINI
+@applicantToken = PASTE_TOKEN_APPLICANT_DISINI
+@companyToken   = PASTE_TOKEN_COMPANY_DISINI
+@recruiterToken = PASTE_TOKEN_RECRUITER_DISINI
+
+
+### ── Health Check (tanpa token) ──────────────
 GET {{baseUrl}}/api/health
 
-### Register - Admin
+
+### ── Register Admin ──────────────────────────
 POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
 {
-  "email": "leaderadmin@gmail.com",
-  "password": "123123",
+  "email": "admin@jobportal.com",
+  "password": "Admin123!",
   "role": "admin"
 }
 
-### Register - Applicant
+
+### ── Register Applicant ──────────────────────
 POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
 {
-  "email": "praintern@gmail.com",
-  "password": "123123",
+  "email": "budi@gmail.com",
+  "password": "123456",
   "role": "applicant"
 }
 
-### Register - Recruiter
+
+### ── Register Company (pemilik perusahaan) ───
 POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
 {
-  "email": "hrd@gmail.com",
-  "password": "123123",
+  "email": "hr@ptmaju.com",
+  "password": "123456",
+  "role": "company"
+}
+
+
+### ── Register Recruiter ──────────────────────
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "recruiter@ptmaju.com",
+  "password": "123456",
   "role": "recruiter"
 }
 
-### Login - Admin (copy token ke @adminToken)
+
+### ── Login Admin ─────────────────────────────
+### Salin "token" dari response ke @adminToken
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "leaderadmin@gmail.com",
-  "password": "123123"
+  "email": "admin@jobportal.com",
+  "password": "Admin123!"
 }
 
-### Login - Applicant (copy token ke @applicantToken)
+
+### ── Login Applicant ─────────────────────────
+### Salin "token" dari response ke @applicantToken
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "praintern@gmail.com",
-  "password": "123123"
+  "email": "budi@gmail.com",
+  "password": "123456"
 }
 
-### Login - Recruiter (copy token ke @recruiterToken)
+
+### ── Login Company ───────────────────────────
+### Salin "token" dari response ke @companyToken
 POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "hrd@gmail.com",
-  "password": "123123"
+  "email": "hr@ptmaju.com",
+  "password": "123456"
 }
 
-### Profile User (semua role)
+
+### ── Login Recruiter ─────────────────────────
+### Salin "token" dari response ke @recruiterToken
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "recruiter@ptmaju.com",
+  "password": "123456"
+}
+
+
+### ── Lihat Data User Saya ────────────────────
 GET {{baseUrl}}/api/users/me
 Authorization: Bearer {{adminToken}}

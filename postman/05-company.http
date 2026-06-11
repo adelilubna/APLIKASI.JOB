@@ -1,0 +1,314 @@
+@baseUrl      = http://localhost:3000
+@companyToken = PASTE_TOKEN_COMPANY_DISINI
+
+# Role "company" = pemilik/HR perusahaan
+# Setelah register & login, buat perusahaan terlebih dahulu
+
+
+### ══════════════════════════════════════════
+###  DASHBOARD
+### ══════════════════════════════════════════
+
+### Dashboard Company
+GET {{baseUrl}}/api/dashboard
+Authorization: Bearer {{companyToken}}
+
+
+### ══════════════════════════════════════════
+###  PROFIL PERUSAHAAN
+### ══════════════════════════════════════════
+
+### Buat Perusahaan (JSON)
+POST {{baseUrl}}/api/companies
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "name": "PT Maju Bersama",
+  "email": "info@ptmaju.com",
+  "phone": "021-5551234",
+  "description": "Perusahaan teknologi terkemuka di Indonesia yang bergerak di bidang pengembangan software",
+  "website": "https://ptmaju.com",
+  "location": "Jakarta",
+  "industry": "Teknologi Informasi",
+  "company_size": "51-200"
+}
+
+### Buat Perusahaan + Logo (multipart/form-data)
+### Field: logo  |  Tipe: file  |  Format: JPG/PNG/WEBP  |  Max: 2MB
+POST {{baseUrl}}/api/companies
+Authorization: Bearer {{companyToken}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="name"
+
+PT Maju Bersama
+------FormBoundary
+Content-Disposition: form-data; name="email"
+
+info@ptmaju.com
+------FormBoundary
+Content-Disposition: form-data; name="phone"
+
+021-5551234
+------FormBoundary
+Content-Disposition: form-data; name="description"
+
+Perusahaan teknologi terkemuka di Indonesia
+------FormBoundary
+Content-Disposition: form-data; name="location"
+
+Jakarta
+------FormBoundary
+Content-Disposition: form-data; name="industry"
+
+Teknologi Informasi
+------FormBoundary
+Content-Disposition: form-data; name="company_size"
+
+51-200
+------FormBoundary
+Content-Disposition: form-data; name="logo"; filename="logo_ptmaju.png"
+Content-Type: image/png
+
+< ./logo_ptmaju.png
+------FormBoundary--
+
+### Lihat Perusahaan Saya
+GET {{baseUrl}}/api/companies
+Authorization: Bearer {{companyToken}}
+
+### Update Perusahaan
+PUT {{baseUrl}}/api/companies/1
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "name": "PT Maju Bersama Indonesia",
+  "phone": "021-5559999",
+  "description": "Perusahaan teknologi & konsultan IT terkemuka",
+  "website": "https://ptmajuindonesia.com",
+  "location": "Jakarta Selatan",
+  "industry": "Teknologi Informasi",
+  "company_size": "201-500"
+}
+
+
+### ══════════════════════════════════════════
+###  LOWONGAN KERJA
+### ══════════════════════════════════════════
+
+### Lihat Kategori (publik)
+GET {{baseUrl}}/api/categories
+
+### Buat Lowongan Full-time
+POST {{baseUrl}}/api/jobs
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "category_id": 1,
+  "title": "Backend Developer",
+  "description": "Membangun dan memelihara API REST skala enterprise menggunakan Node.js dan MySQL",
+  "location": "Jakarta",
+  "job_type": "full-time",
+  "education_required": "S1",
+  "experience_min_years": 2,
+  "salary_min": 8000000,
+  "salary_max": 15000000,
+  "required_skills": ["nodejs", "mysql", "express", "rest-api", "git"],
+  "deadline": "2026-08-31",
+  "status": "open"
+}
+
+### Buat Lowongan Part-time
+POST {{baseUrl}}/api/jobs
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "category_id": 4,
+  "title": "Graphic Designer",
+  "description": "Membuat konten visual untuk kebutuhan marketing",
+  "location": "Remote",
+  "job_type": "part-time",
+  "education_required": "D3",
+  "experience_min_years": 1,
+  "salary_min": 3000000,
+  "salary_max": 6000000,
+  "required_skills": ["photoshop", "illustrator", "figma"],
+  "deadline": "2026-07-15"
+}
+
+### Buat Lowongan Magang
+POST {{baseUrl}}/api/jobs
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "category_id": 1,
+  "title": "UI/UX Design Intern",
+  "description": "Program magang 3 bulan bagi mahasiswa aktif atau fresh graduate",
+  "location": "Jakarta",
+  "job_type": "internship",
+  "education_required": "SMA/SMK",
+  "experience_min_years": 0,
+  "required_skills": ["figma", "canva"],
+  "deadline": "2026-07-01"
+}
+
+### Lihat Semua Lowongan (publik)
+GET {{baseUrl}}/api/jobs
+
+### Update Lowongan
+PUT {{baseUrl}}/api/jobs/1
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "title": "Senior Backend Developer",
+  "experience_min_years": 3,
+  "salary_min": 12000000,
+  "salary_max": 22000000,
+  "required_skills": ["nodejs", "mysql", "express", "redis", "docker", "kubernetes"],
+  "status": "open"
+}
+
+### Tutup Lowongan
+PUT {{baseUrl}}/api/jobs/1
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "status": "closed"
+}
+
+### Hapus Lowongan
+DELETE {{baseUrl}}/api/jobs/1
+Authorization: Bearer {{companyToken}}
+
+
+### ══════════════════════════════════════════
+###  KELOLA LAMARAN
+### ══════════════════════════════════════════
+
+### Lihat Semua Lamaran (di semua job perusahaan)
+GET {{baseUrl}}/api/applications
+Authorization: Bearer {{companyToken}}
+
+### Lihat Pelamar per Job (lengkap + profil)
+GET {{baseUrl}}/api/applications/job/1
+Authorization: Bearer {{companyToken}}
+
+### Detail Lamaran + Profil Pelamar
+GET {{baseUrl}}/api/applications/1
+Authorization: Bearer {{companyToken}}
+
+### Ubah Status → Reviewed
+PATCH {{baseUrl}}/api/applications/1/status
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "status": "Reviewed"
+}
+
+### Ubah Status → Interview
+PATCH {{baseUrl}}/api/applications/1/status
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "status": "Interview"
+}
+
+### Ubah Status → Accepted
+PATCH {{baseUrl}}/api/applications/1/status
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "status": "Accepted"
+}
+
+### Ubah Status → Rejected
+PATCH {{baseUrl}}/api/applications/1/status
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "status": "Rejected"
+}
+
+
+### ══════════════════════════════════════════
+###  SHORTLIST KANDIDAT
+### ══════════════════════════════════════════
+
+### Tambah ke Shortlist
+POST {{baseUrl}}/api/shortlists
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "application_id": 1,
+  "notes": "Kandidat sangat potensial, lanjutkan ke interview"
+}
+
+### Lihat Shortlist
+GET {{baseUrl}}/api/shortlists
+Authorization: Bearer {{companyToken}}
+
+### Hapus dari Shortlist
+DELETE {{baseUrl}}/api/shortlists/1
+Authorization: Bearer {{companyToken}}
+
+
+### ══════════════════════════════════════════
+###  JADWAL INTERVIEW
+### ══════════════════════════════════════════
+
+### Jadwalkan Interview
+POST {{baseUrl}}/api/interviews/applications/1
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "scheduledAt": "2026-07-20 09:00:00",
+  "meetingLink": "https://meet.google.com/xyz-abcd-efg",
+  "location": "Kantor PT Maju Bersama, Lantai 5",
+  "notes": "Interview HR + teknis, bawa dokumen pendukung"
+}
+
+### Lihat Interview per Lamaran
+GET {{baseUrl}}/api/interviews/applications/1
+Authorization: Bearer {{companyToken}}
+
+### Lihat Semua Interview
+GET {{baseUrl}}/api/interviews
+Authorization: Bearer {{companyToken}}
+
+### Update Interview
+PUT {{baseUrl}}/api/interviews/1
+Authorization: Bearer {{companyToken}}
+Content-Type: application/json
+
+{
+  "scheduledAt": "2026-07-21 10:00:00",
+  "notes": "Reschedule karena konflik jadwal"
+}
+
+### Hapus Interview
+DELETE {{baseUrl}}/api/interviews/1
+Authorization: Bearer {{companyToken}}
+
+
+### ══════════════════════════════════════════
+###  MATCHING KANDIDAT
+### ══════════════════════════════════════════
+
+### Match Kandidat untuk Job
+### Skor: Skills 50pt + Pendidikan 20pt + Pengalaman 20pt + Lokasi 10pt
+GET {{baseUrl}}/api/matching/job/1
+Authorization: Bearer {{companyToken}}
